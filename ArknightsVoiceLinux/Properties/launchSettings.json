@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ArknightsVoice": {
+      "commandName": "Project",
+      "remoteDebugEnabled": false
+    }
+  }
+}
