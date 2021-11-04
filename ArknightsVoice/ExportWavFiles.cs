@@ -1,9 +1,7 @@
 ﻿using AssetStudio;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace ArknightsVoice
@@ -13,37 +11,33 @@ namespace ArknightsVoice
         private static string redirectFolder;
         public static void DumpAbFiles(AssetsManager asManager, Dictionary<string, string> dict, string langPath)
         {
-            using (List<SerializedFile>.Enumerator enumerator = asManager.assetsFileList.GetEnumerator())
+            foreach (var assetsFile in asManager.assetsFileList)
             {
-                while (enumerator.MoveNext())
+                foreach (var asset in assetsFile.Objects)
                 {
-                    for (int i = 0; i < enumerator.Current.Objects.Count; i++)
+                    if (asset.type != ClassIDType.AudioClip)
                     {
-                        try
-                        {
-                            AudioClip audioClip = (AudioClip)enumerator.Current.Objects[i];
-                            String name = audioClip.m_Name;
-                            String temp = audioClip.assetsFile.originalPath;
-                            String wordKey = GetFileName(temp);
-                            String tempFolderName = wordKey + "_" + name + ".wav";
-
-                            try
-                            {
-                                redirectFolder = dict[tempFolderName.Replace("_CN", "/CN")];
-                            }
-                            catch (KeyNotFoundException)
-                            {
-                                Console.WriteLine("对应Key不存在语音数据列表中，尝试原名输出");
-                                redirectFolder = tempFolderName;
-                            }
-                            ExportAudioClip(enumerator.Current.Objects[i], langPath + wordKey + "/", redirectFolder, langPath);
-                            Console.WriteLine("已导出 " + wordKey + "_" + name + ".");
-                        }
-                        catch (InvalidCastException)
-                        {
-                            Console.WriteLine("跳过非AudioClip文件");
-                        }
+                        Console.WriteLine("跳过非AudioClip文件");
+                        return;
                     }
+                    AudioClip audioClip = (AudioClip)asset;
+                    String name = audioClip.m_Name;
+                    String temp = audioClip.assetsFile.originalPath;
+                    String wordKey = GetFileName(temp);
+                    String tempFolderName = wordKey + "_" + name + ".wav";
+
+                    try
+                    {
+                        redirectFolder = dict[tempFolderName.Replace("_CN", "/CN")];
+                    }
+                    catch (KeyNotFoundException)
+                    {
+                        Console.WriteLine("对应Key不存在语音数据列表中，尝试原名输出");
+                        redirectFolder = tempFolderName;
+                    }
+                    ExportAudioClip(audioClip, langPath + wordKey + "/", redirectFolder, langPath);
+
+                    Console.WriteLine("已导出 " + wordKey + "_" + name + ".");
                 }
             }
         }
